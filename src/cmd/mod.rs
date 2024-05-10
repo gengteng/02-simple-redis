@@ -1,3 +1,4 @@
+mod echo;
 mod hmap;
 mod map;
 
@@ -32,6 +33,7 @@ pub trait CommandExecutor {
 #[enum_dispatch(CommandExecutor)]
 #[derive(Debug)]
 pub enum Command {
+    Echo(Echo),
     Get(Get),
     Set(Set),
     HGet(HGet),
@@ -40,6 +42,11 @@ pub enum Command {
 
     // unrecognized command
     Unrecognized(Unrecognized),
+}
+
+#[derive(Debug)]
+pub struct Echo {
+    key: String,
 }
 
 #[derive(Debug)]
@@ -97,6 +104,7 @@ impl TryFrom<RespArray> for Command {
                 b"hget" => Ok(HGet::try_from(v)?.into()),
                 b"hset" => Ok(HSet::try_from(v)?.into()),
                 b"hgetall" => Ok(HGetAll::try_from(v)?.into()),
+                b"echo" => Ok(Echo::try_from(v)?.into()),
                 _ => Ok(Unrecognized.into()),
             },
             _ => Err(CommandError::InvalidCommand(
